@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  amarr:
+    build: .
+    container_name: amarr
+    environment:
+      - AMULE_HOST=amule
+      - AMULE_PORT=4712
+      - AMULE_PASSWORD=Wreg!Bo@Sho5
+      - AMULE_FINISHED_PATH=/incoming
+      - AMARR_CONFIG_PATH=/config
+      - AMARR_LOG_LEVEL=INFO
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/amarr:/config
+      - /share/data/amule:/incoming
+      - /share/data/media:/plex
+    networks:
+      - qnap-network
+    restart: unless-stopped
+    depends_on:
+      - amule
+
+  amule:
+    image: ngosang/amule
+    container_name: amule
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+      - GUI_PWD=Wreg!Bo@Sho5
+      - WEBUI_PWD=Wreg!Bo@Sho5
+      - MOD_AUTO_RESTART_ENABLED=true
+      - MOD_AUTO_RESTART_CRON=0 6 * * *
+      - MOD_AUTO_SHARE_ENABLED=false
+      - MOD_AUTO_SHARE_DIRECTORIES=/incoming
+      - MOD_FIX_KAD_GRAPH_ENABLED=true
+      - MOD_FIX_KAD_BOOTSTRAP_ENABLED=true
+    ports:
+      - "4711:4711"
+      - "4712:4712"
+      - "4662:4662"
+      - "4665:4665/udp"
+      - "4672:4672/udp"
+    volumes:
+      - ./config/amule:/home/amule/.aMule
+      - /share/data/amule:/incoming
+      - /share/data/amule/temp:/temp
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - qnap-network
+    restart: unless-stopped
+
+networks:
+  qnap-network:
+    external: true
