@@ -48,7 +48,7 @@ class FileCategoryStore(storePath: String) : CategoryStore {
                 return
             val lines = file.readLines()
             val line = lines.find { it.split('\t')[0] == hash } ?: return
-            file.writeText(lines.filterNot { it == line }.joinToString("\n"))
+            file.writeText(lines.filterNot { it == line }.joinToString("\n", postfix = "\n"))
             hashesCache.remove(hash)
         }
     }
