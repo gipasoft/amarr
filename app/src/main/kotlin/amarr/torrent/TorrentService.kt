@@ -9,6 +9,8 @@ import jamule.AmuleClient
 import jamule.model.AmuleTransferringFile
 import jamule.model.DownloadCommand
 import jamule.model.FileStatus
+import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 class TorrentService(
@@ -17,6 +19,7 @@ class TorrentService(
     private val finishedPath: String,
     private val log: Logger
 ) {
+    private val movedHashes = mutableSetOf<String>()
 
     fun getTorrentInfo(category: String?): List<TorrentInfo> {
         val downloadingFiles = amuleClient
@@ -31,13 +34,16 @@ class TorrentService(
 
         return allFiles
             .map { dl ->
-                if (dl is AmuleTransferringFile)
+                val cat = categoryStore.getCategory(dl.fileHashHexString!!)
+                val categoriesMap = getCategories()
+                val savePath = categoriesMap[cat]?.savePath ?: finishedPath
+                val torrentInfo = if (dl is AmuleTransferringFile)
                     TorrentInfo(
                         hash = dl.fileHashHexString!!,
                         name = dl.fileName!!,
                         size = dl.sizeFull!!,
                         total_size = dl.sizeFull!!,
-                        save_path = finishedPath,
+                        save_path = savePath,
                         downloaded = dl.sizeDone!!,
                         progress = dl.sizeDone!!.toDouble() / dl.sizeFull!!.toDouble(),
                         priority = dl.downPrio.toInt(),
@@ -54,7 +60,7 @@ class TorrentService(
 
                             else -> TorrentState.unknown
                         },
-                        category = category,
+                        category = cat,
                         dlspeed = dl.speed!!,
                         num_seeds = dl.sourceXferCount.toInt(),
                         eta = computeEta(dl.speed!!, dl.sizeFull!!, dl.sizeDone!!),
@@ -66,16 +72,39 @@ class TorrentService(
                         name = dl.fileName!!,
                         size = dl.sizeFull!!,
                         total_size = dl.sizeFull!!,
-                        save_path = finishedPath,
+                        save_path = savePath,
                         dlspeed = 0,
                         downloaded = dl.sizeFull!!,
                         progress = 1.0,
                         priority = 0,
                         state = TorrentState.uploading,
-                        category = category,
+                        category = cat,
                         eta = 0,
                         num_seeds = 0, // Irrelevant
                     )
+                if (torrentInfo.state == TorrentState.uploading && cat != null && savePath.isNotEmpty() && savePath != finishedPath && !movedHashes.contains(torrentInfo.hash)) {
+                    try {
+                        val source = Path(finishedPath, dl.fileName!!)
+                        if (Files.exists(source)) {
+                            val targetDir = Path(savePath)
+                            Files.createDirectories(targetDir)
+                            val target = targetDir.resolve(source.fileName)
+                            if (Files.exists(target)) {
+                                movedHashes.add(torrentInfo.hash)
+                                log.info("Torrent ${torrentInfo.hash} already at destination $savePath, skipping move")
+                            } else {
+                                Files.move(source, target)
+                                movedHashes.add(torrentInfo.hash)
+                                log.info("Moved completed torrent ${torrentInfo.hash} to $savePath")
+                            }
+                        } else {
+                            movedHashes.add(torrentInfo.hash)
+                        }
+                    } catch (e: Exception) {
+                        log.error("Failed to move torrent ${torrentInfo.hash}", e)
+                    }
+                }
+                torrentInfo
             }
     }
 
