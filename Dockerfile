@@ -2,7 +2,7 @@
 FROM gradle:8-jdk17 AS builder
 WORKDIR /app
 COPY . .
-RUN gradle app:installDist --no-daemon
+RUN gradle app:installDist --no-daemon && rm -rf ~/.gradle/caches
 
 # Stage 2: Run
 FROM eclipse-temurin:17-jre-alpine
