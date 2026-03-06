@@ -9,7 +9,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import jamule.AmuleClient
 
-fun Application.torrentApi(amuleClient: AmuleClient, categoryStore: CategoryStore, finishedPath: String) {
+fun Application.torrentApi(amuleClient: AmuleClient, categoryStore: CategoryStore, finishedPath: String, mediaPath: String? = null) {
     val service = TorrentService(amuleClient, categoryStore, finishedPath, log)
     routing {
         get("/api/v2/app/webapiVersion") {
@@ -41,7 +41,11 @@ fun Application.torrentApi(amuleClient: AmuleClient, categoryStore: CategoryStor
         }
         post("/api/v2/torrents/createCategory") {
             val params = call.receiveParameters()
-            val category = Category(params["category"]!!, params["savePath"] ?: "")
+            val categoryName = params["category"]!!
+            val savePath = params["savePath"]?.takeIf { it.isNotEmpty() }
+                ?: mediaPath?.let { "$it/$categoryName" }
+                ?: ""
+            val category = Category(categoryName, savePath)
             call.application.log.debug("Received create category request with category: {}", category)
             service.addCategory(category)
             call.respondText("Ok.")

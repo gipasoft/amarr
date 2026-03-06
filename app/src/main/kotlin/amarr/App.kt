@@ -32,6 +32,7 @@ private val AMULE_PASSWORD = System.getenv("AMULE_PASSWORD").apply {
 private val AMULE_FINISHED_PATH = System.getenv("AMULE_FINISHED_PATH").let { it ?: "/finished" }
 private val AMARR_CONFIG_PATH = System.getenv("AMARR_CONFIG_PATH").let { it ?: "/config" }
 private val AMARR_LOG_LEVEL = System.getenv("AMARR_LOG_LEVEL").let { it ?: "INFO" }
+private val AMARR_MEDIA_PATH = System.getenv("AMARR_MEDIA_PATH")
 private val DDUNLIMITEDNET_USERNAME = System.getenv("DDUNLIMITEDNET_USERNAME")
 private val DDUNLIMITEDNET_PASSWORD = System.getenv("DDUNLIMITEDNET_PASSWORD")
 
@@ -65,7 +66,7 @@ internal fun Application.app() {
     }
     debugApi(amuleClient)
     torznabApi(amuleIndexer, ddunlimitednetIndexer)
-    torrentApi(amuleClient, categoryStore, AMULE_FINISHED_PATH)
+    torrentApi(amuleClient, categoryStore, AMULE_FINISHED_PATH, AMARR_MEDIA_PATH)
 }
 
 private fun setLogLevel(logger: Logger) {

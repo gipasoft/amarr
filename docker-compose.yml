@@ -11,6 +11,7 @@ services:
       - AMULE_FINISHED_PATH=/incoming
       - AMARR_CONFIG_PATH=/config
       - AMARR_LOG_LEVEL=INFO
+      - AMARR_MEDIA_PATH=/plex
     ports:
       - "8080:8080"
     volumes:

@@ -36,6 +36,9 @@ AMULE_PASSWORD: secret # The password to connect to aMule
 Optional parameters:
 AMULE_FINISHED_PATH: /finished # The directory where aMule will download the finished files
 AMARR_LOG_LEVEL: INFO # The log level of amarr, defaults to INFO
+AMARR_MEDIA_PATH: /media # Base path for media categories. When set, categories created by *arr apps without
+                          # an explicit savePath will automatically use <AMARR_MEDIA_PATH>/<categoryName>.
+                          # E.g. with AMARR_MEDIA_PATH=/plex, the "movies" category will save to /plex/movies.
 ```
 
 It also requires mounting the following volumes:
