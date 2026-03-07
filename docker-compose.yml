@@ -11,13 +11,13 @@ services:
       - AMULE_FINISHED_PATH=/incoming
       - AMARR_CONFIG_PATH=/config
       - AMARR_LOG_LEVEL=INFO
-      - AMARR_MEDIA_PATH=/plex
+      - AMARR_MEDIA_PATH=/data/amule
     ports:
       - "8080:8080"
     volumes:
       - ./config/amarr:/config
       - /share/data/amule:/incoming
-      - /share/data/media:/plex
+      - /share/data:/data
     networks:
       - qnap-network
     restart: unless-stopped

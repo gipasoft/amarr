@@ -102,6 +102,57 @@ Download Client: The name you gave to amarr in the previous step
 
 **You will have to do this for every indexer you want to use with amarr.**
 
+## How it works (example with Radarr)
+
+This section describes the full download flow when Radarr requests a movie via amarr.
+
+### 1. Radarr sends the download request
+
+Radarr finds a match through one of the amarr indexers and sends the download to amarr, treating it as a
+qBittorrent client. As part of this request, Radarr creates a category (e.g. `movies`) and passes it along.
+
+### 2. Amarr creates the category and assigns a save path
+
+If the category does not exist yet, amarr creates it with a `savePath` derived from `AMARR_MEDIA_PATH`:
+
+```
+savePath = <AMARR_MEDIA_PATH>/<categoryName>
+# e.g. /data/amule/movies
+```
+
+Amarr then forwards the ed2k link to aMule, which starts the download.
+
+### 3. aMule downloads the file
+
+aMule downloads the file into `AMULE_FINISHED_PATH` (e.g. `/incoming`).
+
+### 4. Amarr detects completion and moves the file
+
+Radarr polls amarr periodically via `GET /api/v2/torrents/info`.
+When amarr sees the file is complete, it moves it from the finished path to the category save path:
+
+```
+/incoming/<filename>  →  /data/amule/movies/<filename>
+```
+
+Amarr reports `save_path = /data/amule/movies` to Radarr.
+
+### 5. Radarr imports the file
+
+Radarr reads the file from `save_path` and imports it into the Plex/media library.
+
+### Path mapping
+
+For the above to work, the same physical directory must be accessible by both amarr and Radarr, potentially
+under different mount points. Example with a QNAP NAS:
+
+| Host path | amarr container | Radarr container |
+|---|---|---|
+| `/share/data/amule` | `/incoming` | `/data/amule` |
+| `/share/data` | `/data` | `/data` |
+
+With this setup, `AMARR_MEDIA_PATH=/data/amule` ensures amarr and Radarr refer to the same physical location.
+
 ## Indexers
 
 ### `amule`
