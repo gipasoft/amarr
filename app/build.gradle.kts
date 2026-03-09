@@ -43,7 +43,7 @@ tasks.named<Test>("test") {
 
 jib {
     from {
-        image = "eclipse-temurin:17-jre-alpine"
+        image = "eclipse-temurin:17-jre"
         platforms {
             platform {
                 architecture = "amd64"
