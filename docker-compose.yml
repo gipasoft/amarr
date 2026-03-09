@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   amarr:
-    build: .
+    image: ghcr.io/gipasoft/amarr:latest
     container_name: amarr
     environment:
       - AMULE_HOST=amule
@@ -13,7 +13,7 @@ services:
       - AMARR_LOG_LEVEL=INFO
       - AMARR_MEDIA_PATH=/data/amule
     ports:
-      - "8080:8080"
+      - "5151:8080"
     volumes:
       - ./config/amarr:/config
       - /share/data/amule:/incoming

@@ -56,11 +56,11 @@ jib {
         }
     }
     to {
-        image = "vexdev/amarr"
+        image = "ghcr.io/gipasoft/amarr"
         tags = setOf(version.toString())
         auth {
-            username = System.getenv("DOCKER_USERNAME")
-            password = System.getenv("DOCKER_PASSWORD")
+            username = System.getenv("GITHUB_ACTOR")
+            password = System.getenv("GITHUB_TOKEN")
         }
     }
 }
