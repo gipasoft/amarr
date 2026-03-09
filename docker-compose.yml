@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   amarr:
     image: ghcr.io/gipasoft/amarr:latest
